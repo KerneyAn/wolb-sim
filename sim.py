@@ -16,7 +16,7 @@ class ColinearBlock:
     genome2_strand: str
 
 
-def read_xmfa(xmfa_file: Path) -> list[tuple[tuple]]:
+def read_xmfa(xmfa_file: Path) -> list[ColinearBlock]:
     """
     Reads xmfa entries only file and returns list of tuples of colinear blocks
 
