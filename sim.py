@@ -15,6 +15,21 @@ class ColinearBlock:
     genome2_pos: str
     genome2_strand: str
 
+def read_genome_fa(fasta_file: Path) -> str:
+    """
+    Reads fasta file of wolbachia genome. expects only one fasta entry
+
+    Args:
+        fasta_file (Path): Path to wolbachia fasta
+
+    Returns:
+        str: Fasta string
+    """
+    with fasta_file.open(mode="r") as f:
+        lines = f.readlines()
+
+    seq = "".join(line.strip() for line in lines if not line.startswith(">"))
+    return seq
 
 def read_xmfa(xmfa_file: Path) -> list[ColinearBlock]:
     """
@@ -49,6 +64,47 @@ def read_xmfa(xmfa_file: Path) -> list[ColinearBlock]:
                 out.append(block)
     return out
 
+def make_sub(seqA: str, seqB: str, block: ColinearBlock) -> None:
+    '''
+    This is for site-specific recombination.
+    Recombination(Sequence A, Sequence B, which Sequence(should be string i.e = "A"), Position1 of Sequence A, Position2 of Sequence B)
+    '''
+    whichSeq = "B"
+
+    print(block)
+
+    gen1Block = block.genome1_pos
+    coordA = gen1Block.replace(':', ' ').replace('-', ' ').split()
+    gen2Block = block.genome2_pos
+    coordB = gen2Block.replace(':', ' ').replace('-', ' ').split()
+    
+
+    # Subtract 1 from x because python starts counting from 0
+    recombPosone = tuple(map(lambda i, j: i - j, (int(coordA[1]),int(coordA[2])), (1,0))) 
+    recombPostwo = tuple(map(lambda i, j: i - j, (int(coordB[1]),int(coordB[2])), (1,0)))
+
+    #Choosing the donor
+    if whichSeq == "A":
+        replaceSeq = seqA[recombPosone[0]:recombPosone[1]]
+        recombSeq = seqB[:recombPostwo[0]] + replaceSeq + seqB[recombPostwo[1]:]
+        with open("wMelInwRitestA.fa", "w") as f:
+            f.write(">wMelInwRitestA\n")
+            f.write(recombSeq)
+    else:
+        replaceSeq = seqB[recombPostwo[0]:recombPostwo[1]]
+        recombSeq = seqA[:recombPosone[0]] + replaceSeq + seqB[recombPosone[1]:]
+        with open("wRiInwMeltestB.fa", "w") as f:
+            f.write(">wRiInwMeltestB\n")
+            f.write(recombSeq)
+
+
+
+    # return(replaceSeq, recombPosone, recombPostwo, recombSeq)
+    return(recombPosone, recombPostwo)
 
 if __name__ == "__main__":
-    read_xmfa("./data/entries_only.xmfa")
+    blocks = read_xmfa("./data/entries_only.xmfa")
+    wmel = read_genome_fa(Path("/Users/kerney/RussellLab/RecombinationSims/wolb-sim/genomes/wMelgenome.fna"))
+    wri = read_genome_fa(Path("/Users/kerney/RussellLab/RecombinationSims/wolb-sim/genomes/wRigenome.fna"))
+    print(make_sub(wmel, wri, blocks[0]))
+    
