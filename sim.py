@@ -87,29 +87,30 @@ def read_xmfa(xmfa_file: Path) -> list[ColinearBlock]:
 
 
 def make_sub(g1: str, g2: str, block: ColinearBlock) -> None:
-    print(block)
-    # print(g1, g2)
-    if block.genome1_strand == block.genome2_strand:
-        print("hi")
-        if block.genome1_pos[0] == 0 and block.genome2_pos[0] == 0:
-            new_g1 = (
-                g2[block.genome2_pos[0] : block.genome2_pos[1]]
-                + g1[block.genome1_pos[1] :]
-            )
-            print("hi")
-            new_g2 = (
-                g1[block.genome1_pos[0] : block.genome1_pos[1]]
-                + g2[block.genome2_pos[1] :]
-            )
-        else:
-            pass
-    with open("test.fa", "w") as f:
-        f.write(">test\n")
-        f.write(new_g1)
+    if block.genome1_pos[0] == 0 and block.genome2_pos[0] == 0:
+        new_g1 = (
+            g2[block.genome2_pos[0] : block.genome2_pos[1]] + g1[block.genome1_pos[1] :]
+        )
+
+        new_g2 = (
+            g1[block.genome1_pos[0] : block.genome1_pos[1]] + g2[block.genome2_pos[1] :]
+        )
+    else:
+        new_g1 = (
+            g1[block.genome1_pos[0]]
+            + g2[block.genome2_pos[0] : block.genome2_pos[1]]
+            + g1[block.genome1_pos[1] :]
+        )
+
+        new_g2 = (
+            g2[block.genome2_pos[0]]
+            + g1[block.genome1_pos[0] : block.genome1_pos[1]]
+            + g2[block.genome2_pos[1] :]
+        )
+    # TODO: output new genomes to indiviudal fasta file with name informing the swap.
 
 
 if __name__ == "__main__":
     blocks = read_xmfa(Path("./data/entries_only.xmfa"))
     wmel = read_genome_fa(Path("data/wmel.fa"))
     wri = read_genome_fa(Path("data/wri.fa"))
-    make_sub(wmel, wri, blocks[0])
