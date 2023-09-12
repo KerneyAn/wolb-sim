@@ -15,6 +15,30 @@ class ColinearBlock:
     genome2_pos: tuple
     genome2_strand: str
 
+    def __repr__(self) -> str:
+        return (
+            f"{self.genome1}_{'-'.join(map(str, self.genome1_pos))}_"
+            + f"{self.genome1_strand}-{self.genome2}_"
+            + f"{'-'.join(map(str, self.genome2_pos))}_{self.genome2_strand}"
+        )
+
+
+def read_genome_fa(fasta_file: Path) -> str:
+    """
+    Reads fasta file of wolbachia genome. expects only one fasta entry
+
+    Args:
+        fasta_file (Path): Path to wolbachia fasta
+
+    Returns:
+        str: Fasta string
+    """
+    with fasta_file.open(mode="r") as f:
+        lines = f.readlines()
+
+    seq = "".join(line.strip() for line in lines if not line.startswith(">"))
+    return seq
+
 
 def read_xmfa(xmfa_file: Path) -> list[ColinearBlock]:
     """
@@ -26,7 +50,7 @@ def read_xmfa(xmfa_file: Path) -> list[ColinearBlock]:
     Returns:
         list[ColinearBlock]
     """
-    with open(xmfa_file, "r") as f:
+    with xmfa_file.open(mode="r") as f:
         lines = f.readlines()
 
     out = []
@@ -38,10 +62,16 @@ def read_xmfa(xmfa_file: Path) -> list[ColinearBlock]:
                     prev_line.strip().split() for prev_line in prev_two_lines
                 ]
                 genome1_pos = tuple(
-                    map(int, prev_two_lines[0][1].split(":")[1].split("-"))
+                    map(
+                        lambda x: int(x) - 1,
+                        prev_two_lines[0][1].split(":")[1].split("-"),
+                    )
                 )
                 genome2_pos = tuple(
-                    map(int, prev_two_lines[1][1].split(":")[1].split("-"))
+                    map(
+                        lambda x: int(x) - 1,
+                        prev_two_lines[1][1].split(":")[1].split("-"),
+                    )
                 )
                 block = ColinearBlock(
                     genome1="wmel",
@@ -56,5 +86,30 @@ def read_xmfa(xmfa_file: Path) -> list[ColinearBlock]:
     return out
 
 
+def make_sub(g1: str, g2: str, block: ColinearBlock) -> None:
+    print(block)
+    # print(g1, g2)
+    if block.genome1_strand == block.genome2_strand:
+        print("hi")
+        if block.genome1_pos[0] == 0 and block.genome2_pos[0] == 0:
+            new_g1 = (
+                g2[block.genome2_pos[0] : block.genome2_pos[1]]
+                + g1[block.genome1_pos[1] :]
+            )
+            print("hi")
+            new_g2 = (
+                g1[block.genome1_pos[0] : block.genome1_pos[1]]
+                + g2[block.genome2_pos[1] :]
+            )
+        else:
+            pass
+    with open("test.fa", "w") as f:
+        f.write(">test\n")
+        f.write(new_g1)
+
+
 if __name__ == "__main__":
-    read_xmfa("./data/entries_only.xmfa")
+    blocks = read_xmfa(Path("./data/entries_only.xmfa"))
+    wmel = read_genome_fa(Path("data/wmel.fa"))
+    wri = read_genome_fa(Path("data/wri.fa"))
+    make_sub(wmel, wri, blocks[0])
