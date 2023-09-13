@@ -15,12 +15,12 @@ class ColinearBlock:
     genome2_pos: tuple
     genome2_strand: str
 
-    # def __repr__(self) -> str:
-    #     return (
-    #         f"{self.genome1}_{'-'.join(map(str, self.genome1_pos))}_"
-    #         + f"{self.genome1_strand}-{self.genome2}_"
-    #         + f"{'-'.join(map(str, self.genome2_pos))}_{self.genome2_strand}"
-    #     )
+    def __repr__(self) -> str:
+        return (
+            f"{self.genome1}_{'-'.join(map(str, self.genome1_pos))}_"
+            + f"{self.genome1_strand}-{self.genome2}_"
+            + f"{'-'.join(map(str, self.genome2_pos))}_{self.genome2_strand}"
+        )
 
 
 def read_genome_fa(fasta_file: Path) -> str:
@@ -86,30 +86,35 @@ def read_xmfa(xmfa_file: Path) -> list[ColinearBlock]:
     return out
 
 
-def make_sub(g1: str, g2: str, block: ColinearBlock) -> None:
+def make_sub(wmel: str, wri: str, block: ColinearBlock) -> None:
     if block.genome1_pos[0] == 0 and block.genome2_pos[0] == 0:
-        print(block.genome1_pos)
-        print(block.genome2_pos)
-        new_g1 = (
-            g2[block.genome2_pos[0] : block.genome2_pos[1]] + g1[block.genome1_pos[1] :]
+        wri_into_wmel = (
+            wri[block.genome2_pos[0] : block.genome2_pos[1]]
+            + wmel[block.genome1_pos[1] :]
         )
 
-        new_g2 = (
-            g1[block.genome1_pos[0] : block.genome1_pos[1]] + g2[block.genome2_pos[1] :]
+        wmel_into_wri = (
+            wmel[block.genome1_pos[0] : block.genome1_pos[1]]
+            + wri[block.genome2_pos[1] :]
         )
     else:
-        new_g1 = (
-            g1[block.genome1_pos[0]]
-            + g2[block.genome2_pos[0] : block.genome2_pos[1]]
-            + g1[block.genome1_pos[1] :]
+        wri_into_wmel = (
+            wmel[block.genome1_pos[0]]
+            + wri[block.genome2_pos[0] : block.genome2_pos[1]]
+            + wmel[block.genome1_pos[1] :]
         )
 
-        new_g2 = (
-            g2[block.genome2_pos[0]]
-            + g1[block.genome1_pos[0] : block.genome1_pos[1]]
-            + g2[block.genome2_pos[1] :]
+        wmel_into_wri = (
+            wri[block.genome2_pos[0]]
+            + wmel[block.genome1_pos[0] : block.genome1_pos[1]]
+            + wri[block.genome2_pos[1] :]
         )
-    # TODO: output new genomes to indiviudal fasta file with name informing the swap.
+    with open("wri_into_wmel.fa", "w") as f:
+        f.write(f">{block}")
+        f.write(wri_into_wmel)
+    with open("wmel_into_wri.fa", "w") as f:
+        f.write(f">{block}\n")
+        f.write(wmel_into_wri)
 
 
 if __name__ == "__main__":
