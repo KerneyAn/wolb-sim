@@ -110,7 +110,7 @@ def make_sub(wmel: str, wri: str, block: ColinearBlock) -> None:
             + wri[block.genome2_pos[1] :]
         )
     with open("wri_into_wmel.fa", "w") as f:
-        f.write(f">{block}")
+        f.write(f">{block}\n")
         f.write(wri_into_wmel)
     with open("wmel_into_wri.fa", "w") as f:
         f.write(f">{block}\n")
