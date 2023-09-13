@@ -97,23 +97,19 @@ def make_sub(g1: str, g2: str, block: ColinearBlock) -> None:
         new_g2 = (
             g1[block.genome1_pos[0] : block.genome1_pos[1]] + g2[block.genome2_pos[1] :]
         )
-    # else:
-    #     new_g1 = (
-    #         g1[block.genome1_pos[0]]
-    #         + g2[block.genome2_pos[0] : block.genome2_pos[1]]
-    #         + g1[block.genome1_pos[1] :]
-    #     )
+    else:
+        new_g1 = (
+            g1[block.genome1_pos[0]]
+            + g2[block.genome2_pos[0] : block.genome2_pos[1]]
+            + g1[block.genome1_pos[1] :]
+        )
 
-    #     new_g2 = (
-    #         g2[block.genome2_pos[0]]
-    #         + g1[block.genome1_pos[0] : block.genome1_pos[1]]
-    #         + g2[block.genome2_pos[1] :]
-    # )
+        new_g2 = (
+            g2[block.genome2_pos[0]]
+            + g1[block.genome1_pos[0] : block.genome1_pos[1]]
+            + g2[block.genome2_pos[1] :]
+        )
     # TODO: output new genomes to indiviudal fasta file with name informing the swap.
-    print(new_g1[0:46536] == g2[0:46536])
-    with open("test.fa", "w") as f:
-        f.write(">test\n")
-        f.write(new_g1)
 
 
 if __name__ == "__main__":
