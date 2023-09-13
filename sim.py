@@ -109,10 +109,11 @@ def make_sub(wmel: str, wri: str, block: ColinearBlock) -> None:
             + wmel[block.genome1_pos[0] : block.genome1_pos[1]]
             + wri[block.genome2_pos[1] :]
         )
-    with open("wri_into_wmel.fa", "w") as f:
+
+    with open(f"wri_into_wmel_{block}.fa", "w") as f:
         f.write(f">{block}\n")
         f.write(wri_into_wmel)
-    with open("wmel_into_wri.fa", "w") as f:
+    with open(f"wmel_into_wri.fa_{block}", "w") as f:
         f.write(f">{block}\n")
         f.write(wmel_into_wri)
 
@@ -121,4 +122,5 @@ if __name__ == "__main__":
     blocks = read_xmfa(Path("./data/entries_only.xmfa"))
     wmel = read_genome_fa(Path("data/wmel.fa"))
     wri = read_genome_fa(Path("data/wri.fa"))
-    make_sub(wmel, wri, blocks[0])
+    for block in blocks:
+        make_sub(wmel, wri, block)
