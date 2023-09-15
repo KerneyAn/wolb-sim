@@ -15,8 +15,6 @@ class ColinearBlock:
     genome2_pos: tuple
     genome2_strand: str
 
-<<<<<<< HEAD
-=======
     def __repr__(self) -> str:
         return (
             f"{self.genome1}_{'-'.join(map(str, self.genome1_pos))}_"
@@ -25,7 +23,6 @@ class ColinearBlock:
         )
 
 
->>>>>>> 75621e8a94afd5f5c26b89888cd88369922d72de
 def read_genome_fa(fasta_file: Path) -> str:
     """
     Reads fasta file of wolbachia genome. expects only one fasta entry
@@ -41,10 +38,6 @@ def read_genome_fa(fasta_file: Path) -> str:
 
     seq = "".join(line.strip() for line in lines if not line.startswith(">"))
     return seq
-<<<<<<< HEAD
-=======
-
->>>>>>> 75621e8a94afd5f5c26b89888cd88369922d72de
 
 def read_xmfa(xmfa_file: Path) -> list[ColinearBlock]:
     """
@@ -162,16 +155,8 @@ def make_sub(wmel: str, wri: str, block: ColinearBlock) -> None:
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
-    blocks = read_xmfa("./data/entries_only.xmfa")
-    wmel = read_genome_fa(Path("/Users/kerney/RussellLab/RecombinationSims/wolb-sim/genomes/wMelgenome.fna"))
-    wri = read_genome_fa(Path("/Users/kerney/RussellLab/RecombinationSims/wolb-sim/genomes/wRigenome.fna"))
-    print(make_sub(wmel, wri, blocks[0]))
-    
-=======
     blocks = read_xmfa(Path("./data/entries_only.xmfa"))
     wmel = read_genome_fa(Path("data/wmel.fa"))
     wri = read_genome_fa(Path("data/wri.fa"))
     for block in blocks:
         make_sub(wmel, wri, block)
->>>>>>> 75621e8a94afd5f5c26b89888cd88369922d72de
