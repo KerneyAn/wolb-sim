@@ -1,0 +1,28 @@
+configfile: "/Users/kerney/RussellLab/RecombinationSims/wolb-sim/Simulator_Snakemake/config/config.yaml"
+
+include: "rules/common.smk"
+
+rule all:
+    input: 
+        expand("simulated_reads/{ref_genome}_simR2.fastq", ref_genome = genome_name)
+        
+
+rule sim_Genomes:
+    input: 
+        directory + "/{ref_genome}.fa"
+    output:
+        read_1 = "simulated_reads/{ref_genome}_simR1.fastq",
+        read_2 = "simulated_reads/{ref_genome}_simR2.fastq"
+    conda:
+        "envs/envs.yaml"
+    shell:
+        # wgsim -1 INT len 1st read -2 INT len 1st read -r FLOAT rate of mutations -R FLOAT fraction of indels 
+        # -X FLOAT probability an indel is extended -e FLOAT base error rate 
+        # i.e wgsim -1 150 -2 150 -r 0 -R 0 -X 0 -e 0 reference_input.fasta ref_output_1.fastq ref_output_2.fastq
+        """
+        wgsim -1 150 -2 150 -r 0 -R 0.0001 -X 0 -e 0 {input} {output.read_1} {output.read_2}
+        """
+
+
+
+
