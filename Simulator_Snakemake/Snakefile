@@ -1,4 +1,4 @@
-configfile: "/Users/kerney/RussellLab/RecombinationSims/wolb-sim/Simulator_Snakemake/config/config.yaml"
+configfile: "config/config.yaml"
 
 include: "rules/common.smk"
 
@@ -23,8 +23,6 @@ checkpoint run_simpy:
         "envs/env.yaml"
     script:
         "sim.py"
-
-
 
 rule sim_Genomes:
     input:
