@@ -2,19 +2,38 @@ configfile: "/Users/kerney/RussellLab/RecombinationSims/wolb-sim/Simulator_Snake
 
 include: "rules/common.smk"
 
+def find_files(wc):
+    f = checkpoints.run_simpy.get().output[0]
+    file_name = []
+    with open("file_names.txt", "r") as file:
+        file_name = file.read().splitlines()
+    return expand("simulated_reads/{swapped_genome}_sim{rn}.fastq", swapped_genome = file_name, rn=["R1","R2"]) 
+
+
+ruleorder:
+    run_simpy > sim_Genomes 
 rule all:
     input: 
-        expand("simulated_reads/{ref_genome}_simR2.fastq", ref_genome = genome_name)
-        
+        find_files
+
+checkpoint run_simpy:
+    output:
+        "file_names.txt"
+    conda:
+        "envs/env.yaml"
+    script:
+        "sim.py"
+
+
 
 rule sim_Genomes:
-    input: 
-        directory + "/{ref_genome}.fa"
+    input:
+        "mixed_blocks/{swapped_genome}.fa"
     output:
-        read_1 = "simulated_reads/{ref_genome}_simR1.fastq",
-        read_2 = "simulated_reads/{ref_genome}_simR2.fastq"
+        read_1 = "simulated_reads/{swapped_genome}_simR1.fastq",
+        read_2 = "simulated_reads/{swapped_genome}_simR2.fastq",
     conda:
-        "envs/envs.yaml"
+        "envs/env.yaml"
     shell:
         # wgsim -1 INT len 1st read -2 INT len 1st read -r FLOAT rate of mutations -R FLOAT fraction of indels 
         # -X FLOAT probability an indel is extended -e FLOAT base error rate 
@@ -22,7 +41,5 @@ rule sim_Genomes:
         """
         wgsim -1 150 -2 150 -r 0 -R 0.0001 -X 0 -e 0 {input} {output.read_1} {output.read_2}
         """
-
-
 
 

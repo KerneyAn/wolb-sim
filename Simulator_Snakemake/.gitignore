@@ -1,2 +1,4 @@
 .snakemake
 simulated_reads
+mixed_blocks
+file_names.txt
