@@ -1,5 +1,6 @@
 from pathlib import Path
 from dataclasses import dataclass
+import os
 
 
 @dataclass
@@ -110,17 +111,30 @@ def make_sub(wmel: str, wri: str, block: ColinearBlock) -> None:
             + wri[block.genome2_pos[1] :]
         )
 
-    with open(f"wri_into_wmel_{block}.fa", "w") as f:
+    #Creating directory for the swapped blocks fa
+    path = "mixed_blocks"
+
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    with open(f"mixed_blocks/wri_into_wmel_{block}.fa", "w") as f:
         f.write(f">{block}\n")
         f.write(wri_into_wmel)
-    with open(f"wmel_into_wri.fa_{block}", "w") as f:
+    with open(f"mixed_blocks/wmel_into_wri_{block}.fa", "w") as f:
         f.write(f">{block}\n")
         f.write(wmel_into_wri)
-
+    
+    # Need to make a .txt  to list the names for snakemake 
+    with open(f"file_names.txt", "a") as f:
+        f.write(f"wri_into_wmel_{block}\n")
+        f.write(f"wmel_into_wri_{block}\n")
 
 if __name__ == "__main__":
-    blocks = read_xmfa(Path("./data/entries_only.xmfa"))
+    blocks = read_xmfa(Path("data/entries_only.xmfa"))
     wmel = read_genome_fa(Path("data/wmel.fa"))
     wri = read_genome_fa(Path("data/wri.fa"))
     for block in blocks:
         make_sub(wmel, wri, block)
+
+    # #testing here
+    # make_sub(wmel, wri, blocks[0])
