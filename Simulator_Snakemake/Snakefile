@@ -2,12 +2,15 @@ configfile: "config/config.yaml"
 
 include: "rules/common.smk"
 
+ERROR_VAR = 0
+
 def find_files(wc):
     f = checkpoints.run_simpy.get().output[0]
     file_name = []
     with open("file_names.txt", "r") as file:
         file_name = file.read().splitlines()
-    return expand("simulated_reads/{swapped_genome}_sim{rn}.fastq", swapped_genome = file_name, rn=["R1","R2"]) 
+    return expand("simulated_reads/{swapped_genome}_sim.{rn}", swapped_genome = file_name,
+        rn=["bfast.fastq.gz","bwa.read1.fastq.gz", "bwa.read2.fastq.gz", "mutations.vcf", "mutations.txt"]) 
 
 
 ruleorder:
@@ -26,10 +29,16 @@ checkpoint run_simpy:
 
 rule sim_Genomes:
     input:
-        "mixed_blocks/{swapped_genome}.fa"
+        "mixed_blocks/{swapped_genome}.fa",
     output:
-        read_1 = "simulated_reads/{swapped_genome}_simR1.fastq",
-        read_2 = "simulated_reads/{swapped_genome}_simR2.fastq",
+        out = "simulated_reads/{swapped_genome}_sim.bfast.fastq.gz",
+        read1 = "simulated_reads/{swapped_genome}_sim.bwa.read1.fastq.gz",
+        read2 = "simulated_reads/{swapped_genome}_sim.bwa.read2.fastq.gz",
+        mut = "simulated_reads/{swapped_genome}_sim.mutations.vcf",
+        mut_txt = "simulated_reads/{swapped_genome}_sim.mutations.txt"	
+    params:
+        error_rate = ERROR_VAR,
+        out_name = "simulated_reads/{swapped_genome}_sim"
     conda:
         "envs/env.yaml"
     shell:
@@ -37,7 +46,7 @@ rule sim_Genomes:
         # -X FLOAT probability an indel is extended -e FLOAT base error rate 
         # i.e wgsim -1 150 -2 150 -r 0 -R 0 -X 0 -e 0 reference_input.fasta ref_output_1.fastq ref_output_2.fastq
         """
-        wgsim -1 150 -2 150 -r 0 -R 0.0001 -X 0 -e 0 {input} {output.read_1} {output.read_2}
+        dwgsim -N 10000 -1 150 -2 150 -H -y 0 -e {params.error_rate} {input} {params.out_name}
         """
 
 

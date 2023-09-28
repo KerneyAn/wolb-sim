@@ -133,8 +133,8 @@ if __name__ == "__main__":
     blocks = read_xmfa(Path("data/entries_only.xmfa"))
     wmel = read_genome_fa(Path("data/wmel.fa"))
     wri = read_genome_fa(Path("data/wri.fa"))
-    for block in blocks:
-        make_sub(wmel, wri, block)
+    # for block in blocks:
+    #     make_sub(wmel, wri, block)
 
-    # #testing here
-    # make_sub(wmel, wri, blocks[0])
+    #testing here
+    make_sub(wmel, wri, blocks[3])
