@@ -18,9 +18,9 @@ class ColinearBlock:
 
     def __repr__(self) -> str:
         return (
-            f"{self.genome1}_{'-'.join(map(str, self.genome1_pos))}_"
-            + f"{self.genome1_strand}-{self.genome2}_"
-            + f"{'-'.join(map(str, self.genome2_pos))}_{self.genome2_strand}"
+            f"{self.genome1}-{'-'.join(map(str, self.genome1_pos))}-"
+            + f"{self.genome1_strand}-{self.genome2}-"
+            + f"{'-'.join(map(str, self.genome2_pos))}-{self.genome2_strand}"
         )
 
 
@@ -117,17 +117,17 @@ def make_sub(wmel: str, wri: str, block: ColinearBlock) -> None:
     if not os.path.exists(path):
         os.makedirs(path)
 
-    with open(f"mixed_blocks/wri_into_wmel_{block}.fa", "w") as f:
+    with open(f"mixed_blocks/wri-into-wmel-{block}.fa", "w") as f:
         f.write(f">{block}\n")
         f.write(wri_into_wmel)
-    with open(f"mixed_blocks/wmel_into_wri_{block}.fa", "w") as f:
+    with open(f"mixed_blocks/wmel-into-wri-{block}.fa", "w") as f:
         f.write(f">{block}\n")
         f.write(wmel_into_wri)
     
     # Need to make a .txt  to list the names for snakemake 
     with open(f"file_names.txt", "a") as f:
-        f.write(f"wri_into_wmel_{block}\n")
-        f.write(f"wmel_into_wri_{block}\n")
+        f.write(f"wri-into-wmel-{block}\n")
+        f.write(f"wmel-into-wri-{block}\n")
 
 if __name__ == "__main__":
     blocks = read_xmfa(Path("data/entries_only.xmfa"))

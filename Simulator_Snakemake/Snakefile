@@ -42,11 +42,28 @@ rule sim_Genomes:
     conda:
         "envs/env.yaml"
     shell:
-        # wgsim -1 INT len 1st read -2 INT len 1st read -r FLOAT rate of mutations -R FLOAT fraction of indels 
-        # -X FLOAT probability an indel is extended -e FLOAT base error rate 
-        # i.e wgsim -1 150 -2 150 -r 0 -R 0 -X 0 -e 0 reference_input.fasta ref_output_1.fastq ref_output_2.fastq
         """
-        dwgsim -N 10000 -1 150 -2 150 -H -y 0 -e {params.error_rate} {input} {params.out_name}
+        dwgsim -N 10000 -1 150 -2 150 -H -y 0 -e {params.error_rate} -E {params.error_rate} -r 0 -F 0 {input} {params.out_name}
         """
 
+rule extractRead1:
+    input:
+        "simulated_reads/{swapped_genome}_sim.bwa.read1.fastq.gz"
+    output:
+        "simulated_reads/{swapped_genome}_sim.bwa.read1.fastq"
+    shell:
+        """
+        gunzip {input}
+        """
+
+# # TODO: Have to unzip read 1, then pass it to the python script 
+# rule check_blocks:
+#     input:
+#         "simulated_reads/{swapped_genome}_sim.bwa.read1.fastq"
+#     output:
+#         possible_recomb.txt
+#     conda:
+#         "envs/env.yaml"
+#     script:
+#         "recomb_check.py"
 
