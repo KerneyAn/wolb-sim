@@ -1,5 +1,3 @@
-# @wmel-51488-74727-+-wri-48698-73288-+_449490_449118_1_0_0_0_0:0:0_0:0:0_0/1
-
 import pysam
 import re
 from pathlib import Path
@@ -15,6 +13,7 @@ class isPairRecomb():
         self.head = ""
 
     def blockRanges(self, head):
+        ''' Parses the data from the headers into class variables'''
         self.head = head
 
         patt1 = "\-[0-9]*\-[0-9]*-" # These are blocks that were swapped
@@ -34,55 +33,74 @@ class isPairRecomb():
         self.insertRange  = (int(insertRan[1]), int(insertRan[2]))
 
     
-    def blockCheck(self, wmelDon):
+    def blockCheck(self, wmelDon, addRange=0):
+        '''Checks for swapped blocks that are in range of homology'''
+
         count_in_range = 0
         count_out_of_range = 0
-
-        # Check each element in the tuple and count how many are within or outside the specified range
-        for value in (self.insertRange[0], self.insertRange[1]):
-            if self.wriRange[0] <= value <= self.wriRange[1]:
-                count_in_range += 1
-            else:
-                count_out_of_range += 1
-
+    
+        if wmelDon == True:
+            whichDonor = "wMel into wRi"
+            # Check each element in the tuple and count how many are within or outside the specified range
+            for value in (self.insertRange[0], self.insertRange[1]):
+                if self.wriRange[0] <= value <= self.wriRange[1]:
+                    count_in_range += 1
+                else:
+                    count_out_of_range += 1
+        else:
+            whichDonor = "wRi into wMel"
+            for value in (self.insertRange[0], self.insertRange[1]):
+                if self.wmelRange[0] <= value <= self.wmelRange[1]:
+                    count_in_range += 1
+                else:
+                    count_out_of_range += 1
+                
         # Check if one value is within the range and one value is outside the range
         if count_in_range == 1 and count_out_of_range == 1:
-            return((self.insertRange[0], self.insertRange[1]), "YES In range: " + self.head)
+            return(True, whichDonor, self.head, (self.insertRange[0], self.insertRange[1]))
         else:
-            return((self.insertRange[0], self.insertRange[1]), "NOT In range: " + self.head)
+            return(False, whichDonor, self.head, (self.insertRange[0], self.insertRange[1]))
   
 
 if __name__ == "__main__":
-    # fileName = parseIn(snakemake.input[0])
-    relName = 'simulated_reads/wmel-into-wri-wmel-51488-74727-+-wri-48698-73288-+_sim.bwa.read1.fastq'
-    fullName = Path(__file__).parent / relName
+    # outfile = "checking.csv"
+    outfile = Path(snakemake.output["csv"]) 
+    addRan = snakemake.params["ampRange"]
+    
 
-    if "wmel-into-wri" in relName:
-        wmelDonor = True
-    elif "wri-into-wmel" in relName:
-        wmelDonor = False
-    else:
-        pass
-    
-    thisPair = isPairRecomb()
-    header = ""
-    
-    with open('profiles1.csv', 'a', newline='') as csvFile:
+    with open(outfile, 'a', newline='') as csvFile:
         writer = csv.writer(csvFile)
-        title = ["File Name", "Header", "Range" ]
+        title = ["File Name", "Header", "Which Donor", "Range", "Total"]
         writer.writerow(title)
-        with fullName.open() as f:
-            for line in f:
-                if line.startswith("@"):
-                    header = line
-                    thisPair.blockRanges(header)
-                    insert, recomHead = thisPair.blockCheck(wmelDonor)
-                    if "YES" in recomHead:
-                        info = [relName, recomHead, insert]
-                        writer.writerow(info)
 
-        spacer = ["", "", ""]
-        writer.writerow(spacer)           
+        for i in range(0,len(snakemake.input)):
+            relName = snakemake.input[i]
+            fullName = Path(__file__).parent / relName
+        
+
+            if "wmel-into-wri" in relName:
+                wmelDonor = True
+            elif "wri-into-wmel" in relName:
+                wmelDonor = False
+            
+            thisPair = isPairRecomb()
+            
+            recombTotal = 0
+
+            with fullName.open() as f:
+                for line in f:
+                    if line.startswith("@"):
+                        header = line
+                        thisPair.blockRanges(header)
+                        inRange, whichDon, recomHead, insert = thisPair.blockCheck(wmelDonor, addRan)
+                        if inRange == True:
+                            info = [relName, recomHead, whichDon, insert]
+                            writer.writerow(info)
+                            recombTotal += 1
+
+
+                spacer = [relName, "-", "-", "-", recombTotal]
+                writer.writerow(spacer)           
                         
 
     
