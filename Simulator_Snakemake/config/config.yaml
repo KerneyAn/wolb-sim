@@ -1,2 +1,13 @@
 ## Reference genomes paths ##
-genome_path: "/mixed_blocks"
+#"path/to/genome.fa"
+genome_path: "data/"
+
+
+coverage_groups:
+  ## Each key is a group that mean cov will be calculated for. 
+  ## Value should be the contig names in the reference genome. Must be list of strings.
+  dmel: ["NT_033779.5","NT_033778.4","NT_037436.4","NT_033777.3","NC_004353.4"]
+    
+  wri: ["NC_012416.1"]
+    
+  wmel: ["NC_002978.6"]
