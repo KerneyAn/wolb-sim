@@ -14,7 +14,8 @@ def find_files(wc):
     
 rule all:
     input: 
-        csv = "possible_recomb.csv"
+         lambda wc: expand("simulated_reads/{swapped_genome}_sim.{rn}", swapped_genome=find_files(wc),
+        rn=["bfast.fastq.gz","bwa.read1.fastq.gz", "bwa.read2.fastq.gz", "mutations.vcf", "mutations.txt"]) 
 
 
 checkpoint run_simpy:
