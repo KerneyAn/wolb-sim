@@ -32,8 +32,10 @@ class fastaMerger():
                                 line = f'{line[:-1]}_{file_counter}'
                                 file_counter += 1
                             out_fasta.write(line)
+                        
                             if i < len(lines) and line.strip():  # Add newline unless it's the last line
                                 out_fasta.write('\n')
+                               
                     
                 # Reset the file counter for the next input file
                 file_counter = 1
@@ -47,7 +49,6 @@ def main():
     swapped = snakemake.input["re"]
     groups = snakemake.params["groups"] 
 
-    print(swapped)
 
     inFiles = []
     for k, v in groups.items():
@@ -57,18 +58,20 @@ def main():
 
     files = inFiles.copy()
    
+    
 
-    for m in swapped:
-        name = m.replace("mixed_blocks/", "")
-        name = name.replace(".fa", "")
-        out = name + "_merged.fa"
-        files.extend([m])
-        thisMerger.merger(files, howMany, out)
-        files = inFiles.copy()
-   
-    # out = name + "_merged.fa"
-    # files.extend([swapped])
-    # thisMerger.merger(files, howMany, out)
+    # for m in swapped:
+    #     name = m.replace("mixed_blocks/", "merged_reads/")
+    #     name = name.replace(".fa", "")
+    #     out = name + "_merged.fa"
+    #     files.extend([m])
+    #     thisMerger.merger(files, howMany, out)
+    #     files = inFiles.copy()
+
+    name = swapped.replace("mixed_blocks/", "merged_reads/")
+    out = name.replace(".fa", "_merged.fa")
+    files.extend([swapped])
+    thisMerger.merger(files, howMany, out)
 
     # # testing
     # mel =  "x_samp/mel.fa"

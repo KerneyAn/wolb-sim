@@ -131,8 +131,8 @@ def make_sub(wmel: str, wri: str, block: ColinearBlock) -> None:
 
 if __name__ == "__main__":
     blocks = read_xmfa(Path("data/entries_only.xmfa"))
-    wmel = read_genome_fa(Path("data/wmel.fa"))
-    wri = read_genome_fa(Path("data/wri.fa"))
+    wmel = read_genome_fa(Path("data/NC_002978.6.fa"))
+    wri = read_genome_fa(Path("data/NC_012416.1.fa"))
     # for block in blocks:
     #     make_sub(wmel, wri, block)
 

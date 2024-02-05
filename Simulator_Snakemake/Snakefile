@@ -10,12 +10,16 @@ def find_files(wc):
     with open("file_names.txt", "r") as file:
         file_name = file.read().splitlines()
     return(file_name)
+ 
 
-    
+# rule all:
+#     input: 
+#          lambda wc: expand("simulated_reads/{swapped_genome}_sim.{rn}", swapped_genome=find_files(wc),
+#         rn=["bfast.fastq.gz","bwa.read1.fastq.gz", "bwa.read2.fastq.gz", "mutations.vcf", "mutations.txt"]) 
+
 rule all:
-    input: 
-         lambda wc: expand("simulated_reads/{swapped_genome}_sim.{rn}", swapped_genome=find_files(wc),
-        rn=["bfast.fastq.gz","bwa.read1.fastq.gz", "bwa.read2.fastq.gz", "mutations.vcf", "mutations.txt"]) 
+    input:
+        csv = "possible_recomb.csv"
 
 
 checkpoint run_simpy:
@@ -28,10 +32,10 @@ checkpoint run_simpy:
 
 rule merge_fa:
     input:
-        re = lambda wc: expand("mixed_blocks/{swapped_genome}.fa", swapped_genome=find_files(wc))
-        # re = "mixed_blocks/{swapped_genome}.fa"
+        # re = lambda wc: expand("mixed_blocks/{swapped_genome}.fa", swapped_genome=find_files(wc))
+        re = "mixed_blocks/{swapped_genome}.fa"
     output:
-        out = "{swapped_genome}_merged.fa"
+        out = "merged_reads/{swapped_genome}_merged.fa"
     params:
         howMany = [1, 1, 1, 1, 1, 1, 1, 1], #[mel, ri, host, re]
         groups = config["coverage_groups"],
@@ -43,7 +47,7 @@ rule merge_fa:
 
 rule sim_Genomes:
     input:
-        merged = "{swapped_genome}_merged.fa"
+        merged = "merged_reads/{swapped_genome}_merged.fa"
     output:
         out = ("simulated_reads/{swapped_genome}_sim.bfast.fastq.gz"),
         read1 = "simulated_reads/{swapped_genome}_sim.bwa.read1.fastq.gz",
@@ -57,7 +61,7 @@ rule sim_Genomes:
         "envs/env.yaml"
     shell:
         """
-        dwgsim -N 10000 -1 150 -2 150 -H -y 0 -e {params.error_rate} -E {params.error_rate} -r 0 -F 0 {input.merged} {params.out_name}
+        dwgsim -N 200000000 -1 150 -2 150 -H -y 0 -e {params.error_rate} -E {params.error_rate} -r 0 -F 0 {input.merged} {params.out_name}
         """
 
 
@@ -80,27 +84,27 @@ rule sim_Genomes:
 #         dwgsim -N 10000 -1 150 -2 150 -H -y 0 -e {params.error_rate} -E {params.error_rate} -r 0 -F 0 {input} {params.out_name}
 #         """
 
-# rule extractRead1:
-#     input:
-#         "simulated_reads/{swapped_genome}_sim.bwa.read1.fastq.gz"
-#     output:
-#         "simulated_reads/{swapped_genome}_sim.bwa.read1.fastq"
-#     shell:
-#         """
-#         gunzip {input}
-#         """
+rule extractRead1:
+    input:
+        "simulated_reads/{swapped_genome}_sim.bwa.read1.fastq.gz"
+    output:
+        "simulated_reads/{swapped_genome}_sim.bwa.read1.fastq"
+    shell:
+        """
+        gunzip {input}
+        """
 
 
-# rule check_blocks:
-#     input:
-#         lambda wc: expand("simulated_reads/{swapped_genome}_sim.bwa.read1.fastq", swapped_genome=find_files(wc))
-#     output:
-#         csv = "possible_recomb.csv"
-#     params:
-#         ampRange = 150
-#     conda:
-#         "envs/env.yaml"
-#     script:
-#         "recom_check.py"
+rule check_blocks:
+    input:
+        lambda wc: expand("simulated_reads/{swapped_genome}_sim.bwa.read1.fastq", swapped_genome=find_files(wc))
+    output:
+        csv = "possible_recomb.csv"
+    params:
+        ampRange = 150
+    conda:
+        "envs/env.yaml"
+    script:
+        "recom_check.py"
 
 
