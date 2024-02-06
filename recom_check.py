@@ -2,7 +2,7 @@ import pysam
 import re
 from pathlib import Path
 import csv
-
+import gzip
 
 class isPairRecomb():
 
@@ -60,47 +60,37 @@ class isPairRecomb():
             return(True, whichDonor, self.head, (self.insertRange[0], self.insertRange[1]))
         else:
             return(False, whichDonor, self.head, (self.insertRange[0], self.insertRange[1]))
-  
+
 
 if __name__ == "__main__":
     # outfile = "checking.csv"
-    outfile = Path(snakemake.output["csv"]) 
+    outfile = Path(snakemake.output["txt"]) 
     addRan = snakemake.params["ampRange"]
+    found = []
+
     
-
-    with open(outfile, 'a', newline='') as csvFile:
-        writer = csv.writer(csvFile)
-        title = ["File Name", "Header", "Which Donor", "Range", "Total"]
-        writer.writerow(title)
-
-        for i in range(0,len(snakemake.input)):
-            relName = snakemake.input[i]
-            fullName = Path(__file__).parent / relName
-        
-
-            if "wmel-into-wri" in relName:
-                wmelDonor = True
-            elif "wri-into-wmel" in relName:
-                wmelDonor = False
-            
-            thisPair = isPairRecomb()
-            
-            recombTotal = 0
-
-            with fullName.open() as f:
-                for line in f:
-                    if line.startswith("@"):
-                        header = line
-                        thisPair.blockRanges(header)
-                        inRange, whichDon, recomHead, insert = thisPair.blockCheck(wmelDonor, addRan)
-                        if inRange == True:
-                            info = [relName, recomHead, whichDon, insert]
-                            writer.writerow(info)
-                            recombTotal += 1
+    fullName = Path(snakemake.params.recomb_genome).name
 
 
-                spacer = [relName, "-", "-", "-", recombTotal]
-                writer.writerow(spacer)           
-                        
+    if "wmel-into-wri" in relName:
+        wmelDonor = True
+    elif "wri-into-wmel" in relName:
+        wmelDonor = False
+    
+    thisPair = isPairRecomb()
+    
+    recombTotal = 0
+
+    with gzip.open(snakemake.input[0], "rb") as f:
+        for line in f:
+            if line.startswith("@"):
+                header = line
+                thisPair.blockRanges(header)
+                inRange, whichDon, recomHead, insert = thisPair.blockCheck(wmelDonor, addRan)
+                if inRange == True:
+                    info = [relName, recomHead, whichDon, insert]
+                    found.append(recomHead)
+                    recombTotal += 1         
+                
 
     

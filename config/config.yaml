@@ -1,7 +1,18 @@
 ## Reference genomes paths ##
 #"path/to/genome.fa"
-genome_path: "data/"
 
+recomb_genome_path: 
+wmel_genome_path:
+wri_genome_path:
+dmel_genome_path:
+
+num_recomb:
+num_wmel:
+num_wri:
+num_dmel:
+
+sim_read_error_rate:
+num_reads:
 
 coverage_groups:
   ## Each key is a group that mean cov will be calculated for. 

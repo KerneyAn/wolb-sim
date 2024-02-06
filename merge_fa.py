@@ -15,89 +15,62 @@
 # > recomb
 # > recomb
 # ```
-class fastaMerger():
-    def __init__(self):
-        x = ""
-    def merger(self, inputFiles, countFiles, outFile):
-        with open(outFile, 'a') as out_fasta:
-            file_counter = 1
-            for c, numFiles in enumerate(countFiles):
-                for num in range(numFiles):
-                    with open(inputFiles[c], 'r') as in_fasta:
-                        content = in_fasta.read()
-                        # Add a counter to the header names to avoid duplicates
-                        lines = content.split('\n')
-                        for i,line in enumerate(lines):
-                            if line.startswith('>'): # Check if it's a header line
-                                line = f'{line[:-1]}_{file_counter}'
-                                file_counter += 1
-                            out_fasta.write(line)
-                        
-                            if i < len(lines) and line.strip():  # Add newline unless it's the last line
-                                out_fasta.write('\n')
-                               
-                    
-                # Reset the file counter for the next input file
-                file_counter = 1
+
+def read_genome(file_path):
+    """Reads genome sequences from a FASTA file and returns a dictionary of header:sequence."""
+    sequences = {}
+    with open(file_path, 'r') as file:
+        header = None
+        sequence = ''
+        for line in file:
+            line = line.strip()
+            if line.startswith('>'):
+                if header:
+                    # Save the previous sequence
+                    sequences[header] = sequence
+                # Start a new sequence
+                header = line[1:]  # Remove '>'
+                sequence = ''
+            else:
+                sequence += line
+        if header:
+            # Save the last sequence
+            sequences[header] = sequence
+    return sequences
+
+def write_merged_genome(output_path, genomes, counts):
+    """Writes the merged genome sequences to a FASTA file with unique headers."""
+    with open(output_path, 'w') as file:
+        for genome_name, genome_dict in genomes.items():
+            for header, seq in genome_dict.items():
+                for i in range(1, counts[genome_name] + 1):
+                    # Write unique header
+                    file.write(f'>{genome_name}_{header}_{i}\n')
+                    # Write genome sequence
+                    file.write(f'{seq}\n\n')
+
+
 
 def main():
 
-    thisMerger = fastaMerger()
+    # Load the genome sequences
+    genomes = {
+        'recomb': read_genome(snakemake.input.re),
+        'wmel': read_genome(snakemake.input.wmel),
+        'wri': read_genome(snakemake.input.wri),
+        'dmel': read_genome(snakemake.input.dmel)
+    }
 
-    path = snakemake.params["path"]
-    howMany = snakemake.params["howMany"]  
-    swapped = snakemake.input["re"]
-    groups = snakemake.params["groups"] 
+    # Get the counts for each genome
+    counts = {
+        'recomb': int(snakemake.params.re),
+        'wmel': int(snakemake.params.wmel),
+        'wri': int(snakemake.params.wri),
+        'dmel': int(snakemake.params.dmel)
+    }
 
-
-    inFiles = []
-    for k, v in groups.items():
-        for i in v:
-            file = path + i + ".fa"
-            inFiles.append(file)
-
-    files = inFiles.copy()
-   
-    
-
-    # for m in swapped:
-    #     name = m.replace("mixed_blocks/", "merged_reads/")
-    #     name = name.replace(".fa", "")
-    #     out = name + "_merged.fa"
-    #     files.extend([m])
-    #     thisMerger.merger(files, howMany, out)
-    #     files = inFiles.copy()
-
-    name = swapped.replace("mixed_blocks/", "merged_reads/")
-    out = name.replace(".fa", "_merged.fa")
-    files.extend([swapped])
-    thisMerger.merger(files, howMany, out)
-
-    # # testing
-    # mel =  "x_samp/mel.fa"
-    # re =  "x_samp/re.fa"
-    # ri =  "x_samp/ri.fa"
-    # outfileName = "merged.fa"
-
-    # ho1  = "x_samp/a.fa"
-    # ho2  = "x_samp/b.fa"
-    # ho3  = "x_samp/c.fa"
-    # ho4  = "x_samp/d.fa"
-    # ho5  = "x_samp/e.fa"
-
-    # inFiles = [mel, ri, ho1, ho2, ho3, ho4, ho5, re]
-    # howMany = [30, 1, 1, 1]
-    # howMany.extend(howmany[4])
-    # thisMerger = fastaMerger(outfileName)
-    # thisMerger.merger(inFiles, howMany)
-
-    # for file in infiles:
-    #     file = Path(file)
-    #     depths.append(parse(file, groups))
-
-
-
+    # Write the merged genome
+    write_merged_genome(snakemake.output[0], genomes, counts)
 
 if __name__ == "__main__":
     main()
-
