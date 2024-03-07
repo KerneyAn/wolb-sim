@@ -100,18 +100,18 @@ def make_sub(wmel: str, wri: str, block: ColinearBlock) -> None:
         )
     else:
         wri_into_wmel = (
-            wmel[block.genome1_pos[0]]
+            wmel[: block.genome1_pos[0]]
             + wri[block.genome2_pos[0] : block.genome2_pos[1]]
             + wmel[block.genome1_pos[1] :]
         )
 
         wmel_into_wri = (
-            wri[block.genome2_pos[0]]
+            wri[: block.genome2_pos[0]]
             + wmel[block.genome1_pos[0] : block.genome1_pos[1]]
             + wri[block.genome2_pos[1] :]
         )
-
-    #Creating directory for the swapped blocks fa
+        
+    # Creating directory for the swapped blocks fa
     path = "mixed_blocks"
 
     if not os.path.exists(path):
@@ -133,6 +133,9 @@ if __name__ == "__main__":
     blocks = read_xmfa(Path("data/entries_only.xmfa"))
     wmel = read_genome_fa(Path("data/NC_002978.6.fa"))
     wri = read_genome_fa(Path("data/NC_012416.1.fa"))
+    
+    # make_sub(wmel, wri, blocks[3])
     for block in blocks:
         make_sub(wmel, wri, block)
+        
 
